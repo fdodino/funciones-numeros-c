@@ -28,5 +28,6 @@ int main() {
         printf(" %d ", *(pares + i));
     }
     printf("\n");
+    free(pares);
     return 0;
 }
