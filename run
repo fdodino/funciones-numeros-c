@@ -1,0 +1,8 @@
+if [ ! -f $1.c ]; then
+    echo "compilar: el archivo $1 no existe"
+    exit 1
+fi
+
+gcc $1.c -o $1.out
+
+./$1.out
