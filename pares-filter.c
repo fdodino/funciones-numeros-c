@@ -9,18 +9,18 @@ int odd(int nro) {
   return nro % 2 == 1;
 }
 
-int filter(int numeros[], int** pares, int (*unCriterio)(int)) {
+int filter(int numeros[], int** lista, int (*unCriterio)(int)) {
     int cantidad = 0;
     for (int i = 0; i < 10; i++) {
         if (unCriterio (numeros[i])) {
             cantidad = cantidad + 1;
             if (cantidad == 1) {
-              * pares = (int*)malloc(sizeof(int));
+              * lista = (int*)malloc(sizeof(int));
             }
             else{
-              * pares = (int *)realloc(*pares, sizeof(int)*cantidad);
+              * lista = (int *)realloc(*lista, sizeof(int)*cantidad);
             }
-            * (*pares + cantidad -1)  = numeros[i];
+            * (*lista + cantidad -1)  = numeros[i];
         }
     }
     return cantidad;
