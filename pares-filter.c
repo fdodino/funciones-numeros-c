@@ -26,8 +26,8 @@ int filter(int numeros[], int** lista, int (*unCriterio)(int)) {
     return cantidad;
 }
 
-void imprimirResultados(int * lista, int largo){
-    printf("Los números pares son: ");  
+void imprimirResultados(int * lista, int largo, char* textoAMostrar){
+    printf("Los números %s son: ",textoAMostrar);  
     for (int i = 0; i < largo; i++) {
         printf(" %d ", *(lista + i));
     }
@@ -40,10 +40,10 @@ int main() {
     int* resultados;
     int largoResultado;
     largoResultado = filter(numeros, &resultados, &even);
-    imprimirResultados(resultados,largoResultado);
+    imprimirResultados(resultados,largoResultado, "pares");
     free(resultados);
     largoResultado = filter(numeros, &resultados, &odd);
-    imprimirResultados(resultados,largoResultado);
+    imprimirResultados(resultados,largoResultado,"impares");
     free(resultados);
     return 0;
 }
