@@ -102,6 +102,79 @@ int filtrarImares(int numeros[], int** pares) {
 }
 ```
 
-La única diferencia en la función es el cambio de variables en términos de expresividad (`cantidadDePares` por `cantidadDeImpares`) y la función que evalúa el if al momento de decidir si se queda o no con el elemento (`numeros[i] % 2 == 0` por `numeros[i] % 2 == 1`)
+La única diferencia en la función es el cambio de variables en términos de expresividad (`cantidadDePares` por `cantidadDeImpares`) y la función que evalúa el if al momento de decidir si se queda o no con el elemento (`numeros[i] % 2 == 0` por `numeros[i] % 2 == 1`). Esto lleva a tener lógica duplicada, pero... ¿Qué lógica?. Por una parte tenemos el algoritmo que recorre la colección y filtra en base a un criterio, es decir que es todo el código repetido. Lo que cambia es solamente la condición que evalúa el IF de selección para determinar si se queda con un elemeneto o no.
 
+## Tercera solución - reificación de filter
 
+En al tercera opción que se encuentra modelada en el archivo [pares.filter.c](./pares-filter.c) encontramos que en lugar de duplicar toda la lógica, tomamos como camino darle entidad a esa lógica duplicada que tiene como responsabilidad filtrar una colección de números en base a un criterio. 
+
+```c
+int filter(int numeros[], int** lista, int (*unCriterio)(int)) {
+    int cantidadDeElementosFiltrados = 0;
+    for (int i = 0; i < 10; i++) {
+        if (unCriterio (numeros[i])) {
+            cantidadDeElementosFiltrados = cantidadDeElementosFiltrados + 1;
+            if (cantidadDeElementosFiltrados == 1) {
+              * lista = (int*)malloc(sizeof(int));
+            }
+            else{
+              * lista = (int *)realloc(*lista, sizeof(int)*cantidadDeElementosFiltrados);
+            }
+            * (*lista + cantidadDeElementosFiltrados -1)  = numeros[i];
+        }
+    }
+    return cantidadDeElementosFiltrados;
+}
+```
+Por cuestiones de expresividad `cantidadDePares` o `cantidadDeImpares` es llamado `cantidadDeElementosFiltrados` ya que no sabemos el criterio que podría recibir. El criterio no es de cualquier tipo: *recibe un entero y devuelve un entero* (0 o 1 ya que no tenemos un tipo bool por defecto. Podríamos incroporar una biblioteca para tener dicha abstracción pero queda fuera del scope de este ejemplo). Esto lo logramos con un **puntero a función** que nos va a permitir pasar la posición de memoria donde se encuentra una función para invocarla dentro de `filter`.
+
+Entonces ahora contamos con dos funciones muy pequeñas para pasar al filter como parámetro. En ambos casos cumplen con la interfaz propuesta por filter que es de recibir un entero y devolver un enetero:
+```c
+int even(int nro) {
+  return nro % 2 == 0;
+}
+
+int odd(int nro) {
+  return nro % 2 == 1;
+}
+```
+
+Contar con estas abstracciones de más alto nivel nos permite tener varias ventajas:
+- Cuento con la lógica en un solo lugar. Si algo funciona mal en el filter, solamente tengo que modificar el comportamiento de una función
+- Puedo testear el código de forma de asegurarme que el proceso de filtrado es el correcto. Esto otorga garantías a quién utilice mi función.
+- Puedo escalar con nuevas condiciones: Si ahora quier filtrar los números que sean mayores a 5, solamente tengo que hacer la función en cuestión e invocar al filter pasando dicha función como parámetro.
+
+Como bonus, para evitar repetir el bucle de impresión de resultados, podemos abstraer el mismo en una nueva función que recibe un parámetro extra para mostrar el texto del resultado:
+
+```c
+void imprimirResultados(int * lista, int largo, char* textoAMostrar){
+    printf("Los números %s son: ",textoAMostrar);  
+    for (int i = 0; i < largo; i++) {
+        printf(" %d ", *(lista + i));
+    }
+    printf("\n");
+}
+```
+
+Por lo tanto nuestro main se reduce a simples pasos que constan de invocar la función y luego invocar la imrpesión por pantalla
+
+```c
+int main() {
+    int numeros[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int* resultados;
+    int largoResultado;
+    largoResultado = filter(numeros, &resultados, &even);
+    imprimirResultados(resultados,largoResultado, "pares");
+    free(resultados);
+    largoResultado = filter(numeros, &resultados, &odd);
+    imprimirResultados(resultados,largoResultado,"impares");
+    free(resultados);
+    return 0;
+}
+```
+
+## Conclusión
+
+¿Qué ocurriría si el lenguaje C ya me provee de una abstracción como filter? Lograría tener un código más declarativo, porque no estaría teniendo control sobre el bucle del filtrado: utilizo un for? un while? arranco con i en 0 o en 1? La respuesta a todas estas preguntas los sorprenderá porque es **no se y claramente no importa**. ¿Cuántos de ustedes han resuelto estos bucles sin problema alguno? Todos nos hemos confundido en el largo a recorrer, en inicializar mal un valor, etc. Si alguien más modeló esta abstracción por mi, ya testeó los casos posibles y aseguró el funcionamiento.
+
+Lo que nos ayuda a trabajar con código más declarativo es concentrarnos en modelar las reglas de negocio propiamente dichas y con un código menos propenso a errores (error prone). Esto ocurre en haskell.
