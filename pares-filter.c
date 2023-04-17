@@ -10,20 +10,20 @@ int odd(int nro) {
 }
 
 int filter(int numeros[], int** lista, int (*unCriterio)(int)) {
-    int cantidad = 0;
+    int cantidadDeElementosFiltrados = 0;
     for (int i = 0; i < 10; i++) {
         if (unCriterio (numeros[i])) {
-            cantidad = cantidad + 1;
-            if (cantidad == 1) {
+            cantidadDeElementosFiltrados = cantidadDeElementosFiltrados + 1;
+            if (cantidadDeElementosFiltrados == 1) {
               * lista = (int*)malloc(sizeof(int));
             }
             else{
-              * lista = (int *)realloc(*lista, sizeof(int)*cantidad);
+              * lista = (int *)realloc(*lista, sizeof(int)*cantidadDeElementosFiltrados);
             }
-            * (*lista + cantidad -1)  = numeros[i];
+            * (*lista + cantidadDeElementosFiltrados -1)  = numeros[i];
         }
     }
-    return cantidad;
+    return cantidadDeElementosFiltrados;
 }
 
 void imprimirResultados(int * lista, int largo, char* textoAMostrar){

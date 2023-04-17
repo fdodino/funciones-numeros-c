@@ -2,20 +2,20 @@
 #include <stdlib.h>
 
 int filtrarPares(int numeros[], int** pares) {
-    int cantidad = 0;
+    int canitdadDePares = 0;
     for (int i = 0; i < 10; i++) {
         if (numeros[i] % 2 == 0) {
-            cantidad = cantidad + 1;
-            if (cantidad == 1) {
+            canitdadDePares = canitdadDePares + 1;
+            if (canitdadDePares == 1) {
               * pares = (int*)malloc(sizeof(int));
             }
             else{
-              * pares = (int *)realloc(*pares, sizeof(int)*cantidad);
+              * pares = (int *)realloc(*pares, sizeof(int)*canitdadDePares);
             }
-            * (*pares + cantidad -1)  = numeros[i];
+            * (*pares + canitdadDePares -1)  = numeros[i];
         }
     }
-    return cantidad;
+    return canitdadDePares;
 }
 
 int main() {
