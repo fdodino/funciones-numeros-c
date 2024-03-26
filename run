@@ -1,8 +1,25 @@
-if [ ! -f $1.c ]; then
-    echo "compilar: el archivo $1 no existe"
-    exit 1
-fi
+#!/bin/bash
+FILES=()
 
-gcc $1.c -o $1.out
+checkFile() {
+  if [ ! -f $FILE ]; then
+      echo "error al compilar: el archivo $1 no existe"
+      exit 1
+  fi
+  if [[ $1 != *.c ]]; then
+    FILES+=($1.c)
+  else
+    FILES+=($1)
+  fi
+}
 
-./$1.out
+for var in "$@"
+do
+    checkFile $var
+done
+
+FILE="${FILES[0]}"
+NAME=`echo "$FILE" | cut -d'.' -f1`
+gcc ${FILES[@]} -o $NAME.out
+
+./$NAME.out
